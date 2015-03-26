@@ -9,7 +9,12 @@ public class MainDriver {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		JFrame frame = new EmailFrame();
+		EmailClient app = new EmailClient();
+		//app.sendMessage("Example", "This should be the body of the message \n and this should be a new line", "mfurlon@g.clemson.edu");
+		
+		InboxTable table = new InboxTable(app.readEmails());
+		
+		JFrame frame = new EmailFrame(table);
 	}
 
 }

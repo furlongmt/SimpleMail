@@ -5,16 +5,27 @@ import java.awt.GraphicsEnvironment;
 import java.awt.Point;
 
 import javax.swing.JFrame;
+import javax.swing.JTable;
 
 public class EmailFrame extends JFrame {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7504192480955713515L;
 	private static final int width = 800;
 	private static final int height = 600;
 	
-	public EmailFrame() {
+	public EmailFrame(InboxTable model) {
 		super("SimpleMail");
 		//this.setLocationRelativeTo(null);
 		//this.pack();
+		JTable table = new JTable(model);
+		setup();
+		this.getContentPane().add(table);
+	}
+	
+	private void setup() {
 		centerApp();
 		this.setSize(width, height);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
