@@ -1,14 +1,19 @@
 package cu.cs.cpsc215.project3;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Properties;
 
+import javax.activation.DataHandler;
+import javax.mail.BodyPart;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Store;
@@ -22,10 +27,11 @@ public class EmailClient implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1193542647330340001L;
-	private String password = "kobecat69";
-	private String email = "furlongmt@gmail.com"; 
+	private String password = "wordpass1";
+	private String email = "cu2150tester@gmail.com"; 
 	private final static String google_host = "smtp.gmail.com";
-	public ArrayList<Message> messages = new ArrayList<Message>();
+	private ArrayList<Message> messages = new ArrayList<Message>();
+	private Folder[] folders;
 	
 	private Properties setProps() {
 		Properties props = new Properties();
@@ -63,9 +69,6 @@ public class EmailClient implements Serializable {
 	        msg.setSentDate(new Date());
 	        msg.setText(body);
 	        Transport.send(msg, email, password);
-	       // Transport t = session.getTransport("smtps");
-	        //t.connect(google_host, email, password);
-	        //t.sendMessage(msg, msg.getAllRecipients());
 	        
 	        System.out.println("done");
 	    } catch (MessagingException e) {
@@ -73,7 +76,7 @@ public class EmailClient implements Serializable {
 	    }
 	}
 	
-	public ArrayList<Message> readEmails() {
+	public ArrayList<Message> readEmails(String boxName) {
 		Properties props = setProps();
 		
 		try {
@@ -83,13 +86,29 @@ public class EmailClient implements Serializable {
 			Store store = session.getStore("imaps");
 			store.connect(google_host, email, password);
 			
-			Folder inbox = store.getFolder("inbox");
+			/*Folder inbox = store.getFolder("[Gmail]/Sent Mail");
 			inbox.open(Folder.READ_ONLY);
 			int msgCount = inbox.getMessageCount();
+			*/
 			
+			folders = store.getDefaultFolder().list("*");
+			
+			//uncomment if you want to see the list of folders
+			/*for(Folder folder : folders)
+				if ((folder.getType() & javax.mail.Folder.HOLDS_MESSAGES) != 0) {
+		            System.out.println(folder.getFullName() + ": " + folder.getMessageCount());
+		        }
+			*/
+			
+			for(Folder folder: folders) {
+				if(folder.getFullName().toLowerCase().contains(boxName.toLowerCase())) {
+					folder.open(Folder.READ_WRITE);
+					messages = new ArrayList<Message>(Arrays.asList(folder.getMessages()));
+				}
+			}
 			//System.out.println("Total Message = " + msgCount);
 			
-			messages = new ArrayList<Message>(Arrays.asList(inbox.getMessages()));
+			//messages = new ArrayList<Message>(Arrays.asList(inbox.getMessages()));
 			
 			//System.out.println("---------------");
 			
@@ -103,10 +122,12 @@ public class EmailClient implements Serializable {
 			e.printStackTrace();
 		}
 		
-		return messages;
-	}
-	
-	public ArrayList<Message> getMessages() {
+//		Collections.sort(messages, new MessageComparator());
+		
+		Collections.reverse(messages);
+		
 		return messages;
 	}
 }
+
+
