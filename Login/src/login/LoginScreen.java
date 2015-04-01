@@ -2,6 +2,7 @@ package login;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 import java.net.URL;
 
 import javax.swing.*;
@@ -9,8 +10,16 @@ import javax.swing.*;
 public class LoginScreen {
 	
     private static JFrame frame = new JFrame("Email Login");
-	
-    private static void addComponentsToPane(Container pane) {
+    
+    private LoginScreen(){
+    	
+    }
+
+    public static void show() {
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+ 
+        Container pane = frame.getContentPane();
+        
         pane.setLayout(null);
 		JLabel l_prompt = new JLabel("Please Log In:");
 		JLabel l_user = new JLabel("Username:");
@@ -100,8 +109,12 @@ public class LoginScreen {
 				if(t_username.getText().length() > 0 && t_password.getText().length() > 0 && EmailClient.validCreds(t_username.getText(),t_password.getText())){
 					EmailClient app = new EmailClient();
 					InboxTable table = new InboxTable(app.readEmails("All Mail",t_username.getText(),t_password.getText()));
-					frame.setVisible(false);
-					EmailMainScreen.createAndShowLogin(table);
+					try {
+						EmailMainScreen.setComponentsPane(table);
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}
+					EmailMainScreen.show(t_username.getText(),t_password.getText());
 				}
 				else{
 					t_password.setBackground(Color.PINK);
@@ -116,23 +129,17 @@ public class LoginScreen {
 			public void actionPerformed(ActionEvent e) {
 				System.exit(-1);
 			}
-        	
         });
         
-    }
-    
-    private LoginScreen(){
-    	
-    }
-
-    public static void createAndShowLogin() {
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
  
-        addComponentsToPane(frame.getContentPane());
- 
-        Insets insets = frame.getInsets();
-        frame.setSize(400 + insets.left + insets.right,
-                      200 + insets.top + insets.bottom);
+        Insets insets2 = frame.getInsets();
+        frame.setSize(400 + insets2.left + insets2.right,
+                      200 + insets2.top + insets2.bottom);
         frame.setVisible(true);
     }
+    
+    public static void hide(){
+    	frame.setVisible(false);
+    }
+    
 }

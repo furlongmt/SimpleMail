@@ -84,8 +84,7 @@ public class EmailClient implements Serializable {
 			Store store = session.getStore("imaps");
 			store.connect(google_host, email, password);
 			fs = store.getFolder("[Gmail]").list();
-			for(Folder fd:fs)
-			    System.out.println(">> "+fd.getName());
+			EmailMainScreen.setFolders(fs);
 			Folder folder = store.getFolder("[Gmail]").getFolder(boxName);
 			if(folder != null){
 				folder.open(Folder.READ_WRITE);

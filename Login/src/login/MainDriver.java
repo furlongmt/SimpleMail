@@ -5,11 +5,8 @@ package login;
 
 public class MainDriver {
 
-	/**
-	 * @param args
-	 */
 	public static void main(String[] args) {
-		LoginScreen.createAndShowLogin();
+		LoginScreen.show();
 	}
 
 }

@@ -1,6 +1,8 @@
 package login;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
@@ -15,9 +17,20 @@ public class EmailMainScreen {
 	
     private static JFrame frame = new JFrame("Email");
     private static JTextPane textPane;
+    private static Folder[] folders;
+    private static String username;
+    private static String password;
+    private static int menuHeight = 0;
+    
+    public static void setFolders(Folder[] folder){
+    	folders = folder;
+    }
 	
-    private static void addComponentsToPane(Container pane, final InboxTable model) throws IOException {
-        pane.setLayout(null);
+    public static void setComponentsPane(final InboxTable model) throws IOException {
+    	Container pane = frame.getContentPane();
+    	menuHeight = 0;
+    	pane.removeAll();
+    	pane.setLayout(null);
         textPane = new JTextPane();
         JScrollPane scrollPane = new JScrollPane(textPane);
         final JTable table = new JTable(model);
@@ -54,6 +67,27 @@ public class EmailMainScreen {
 				}
 			}
 		});
+		
+		for(int i = 0; i < folders.length; i++){
+			final JButton newb = new JButton(folders[i].getName());
+	        newb.setBounds(pane.getInsets().left, pane.getInsets().top + (menuHeight++ * 30), 150, 30);
+			pane.add(newb);
+			if(folders[i].getName() == model){
+				newb.setBackground(Color.WHITE);
+			}
+			newb.addActionListener( new ActionListener(){
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					EmailClient app = new EmailClient();
+					try {
+						setComponentsPane(new InboxTable(app.readEmails(newb.getText(),username,password)));
+					} catch (IOException e1) {
+					}
+				}
+			});
+			
+		}
 
 		table.setShowHorizontalLines(false);
 		table.setShowVerticalLines(false);
@@ -63,6 +97,7 @@ public class EmailMainScreen {
         scroll.setBounds(insets.left + 150, insets.top, 650, 400);
 
         pane.setBackground(new Color(240,255,255));
+        scroll.setBackground(new Color(240,255,255));
         pane.add(scrollPane);
         pane.add(scroll);
         
@@ -103,13 +138,11 @@ public class EmailMainScreen {
     	
     }
 
-    public static void createAndShowLogin(InboxTable model) {
+    public static void show(String un, String pw) {
+    	username = un;
+    	password = pw;
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        try {
-			addComponentsToPane(frame.getContentPane(),model);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+        LoginScreen.hide();
         frame.setSize(800,600);
         frame.setVisible(true);
     }

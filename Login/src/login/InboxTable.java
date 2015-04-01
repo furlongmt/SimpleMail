@@ -21,19 +21,16 @@ public class InboxTable extends AbstractTableModel {
 	
 	@Override
 	public int getColumnCount() {
-		// TODO Auto-generated method stub
 		return COLUMN_COUNT;
 	}
 
 	@Override
 	public int getRowCount() {
-		// TODO Auto-generated method stub
 		return inbox.length;
 	}
 
 	@Override
 	public Object getValueAt(int row, int col) {
-		// TODO Auto-generated method stub
 		String first = "<html><b>";
 		String last = "</b></html>";
 		row = inbox.length - 1 - row;
