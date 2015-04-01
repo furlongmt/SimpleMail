@@ -15,26 +15,33 @@ import javax.swing.table.*;
 
 public class EmailMainScreen {
 	
-    private static JFrame frame = new JFrame("Email");
+    private static JFrame frame = new JFrame("SimpleMail");
     private static JTextPane textPane;
     private static Folder[] folders;
     private static String username;
     private static String password;
-    private static int menuHeight = 0;
+    private static int menuHeight;
+    private static String selectedFolder = "All Mail";
+    private static JScrollPane scrollPane;
+    private static JScrollPane scroll;
+    private static JButton compose;
+    private static Container pane;
     
     public static void setFolders(Folder[] folder){
     	folders = folder;
     }
 	
     public static void setComponentsPane(final InboxTable model) throws IOException {
-    	Container pane = frame.getContentPane();
-    	menuHeight = 0;
+    	pane = frame.getContentPane();
+    	menuHeight = 2;
     	pane.removeAll();
+    	pane.revalidate();
     	pane.setLayout(null);
-        textPane = new JTextPane();
-        JScrollPane scrollPane = new JScrollPane(textPane);
         final JTable table = new JTable(model);
-        JScrollPane scroll = new JScrollPane(table);
+        textPane = new JTextPane();
+        scrollPane = new JScrollPane(textPane);
+        scroll = new JScrollPane(table);
+        compose = new JButton("Compose");
 
         textPane.setEditable(false);
         
@@ -61,18 +68,27 @@ public class EmailMainScreen {
 			public void valueChanged(ListSelectionEvent e) {
 				setMessage(model, table.getSelectedRow());
 				try {
-					model.getRow(table.getSelectedRow()).setFlag(Flag.SEEN, true);
+					if(model.getRow(table.getSelectedRow()) != null){
+						model.getRow(table.getSelectedRow()).setFlag(Flag.SEEN, true);
+					}
 				} catch (MessagingException e1) {
 					e1.printStackTrace();
 				}
 			}
 		});
 		
+		compose.setBounds(pane.getInsets().left + 25, pane.getInsets().top + 10, 100, 40);
+		compose.setBackground(new Color(255,50,50));
+		compose.setForeground(Color.WHITE);
+		pane.add(compose);
+		
 		for(int i = 0; i < folders.length; i++){
 			final JButton newb = new JButton(folders[i].getName());
 	        newb.setBounds(pane.getInsets().left, pane.getInsets().top + (menuHeight++ * 30), 150, 30);
 			pane.add(newb);
-			if(folders[i].getName() == model){
+			if(newb.getText().compareToIgnoreCase(selectedFolder) == 0){
+				newb.setBackground(Color.LIGHT_GRAY);
+			} else {
 				newb.setBackground(Color.WHITE);
 			}
 			newb.addActionListener( new ActionListener(){
@@ -80,6 +96,7 @@ public class EmailMainScreen {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					EmailClient app = new EmailClient();
+					selectedFolder = newb.getText();
 					try {
 						setComponentsPane(new InboxTable(app.readEmails(newb.getText(),username,password)));
 					} catch (IOException e1) {
@@ -97,7 +114,6 @@ public class EmailMainScreen {
         scroll.setBounds(insets.left + 150, insets.top, 650, 400);
 
         pane.setBackground(new Color(240,255,255));
-        scroll.setBackground(new Color(240,255,255));
         pane.add(scrollPane);
         pane.add(scroll);
         
@@ -106,6 +122,12 @@ public class EmailMainScreen {
     private static void setMessage(InboxTable model, int row) {
     	final StringBuilder sb = new StringBuilder();
 		try {
+			if(model.getRow(row) == null){
+			}
+			else if(model.getRow(row).getContent() instanceof String){
+				sb.append(model.getRow(row).getContent());
+			}
+			else{
 			MimeMultipart mmp = (MimeMultipart) model.getRow(row).getContent();
 			for (int i=0; i<mmp.getCount(); i++) {
 			    BodyPart mbp = mmp.getBodyPart(i);
@@ -123,6 +145,7 @@ public class EmailMainScreen {
 			        }
 			        sb.append(bstr.toString());
 			    }
+			}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
