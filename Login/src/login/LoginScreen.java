@@ -2,7 +2,6 @@ package login;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.io.IOException;
 import java.net.URL;
 
 import javax.swing.*;

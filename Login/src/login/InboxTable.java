@@ -26,7 +26,7 @@ public class InboxTable extends AbstractTableModel {
 
 	@Override
 	public int getRowCount() {
-		return inbox.length;
+		return (inbox.length == 0? 1:inbox.length);
 	}
 
 	@Override
@@ -36,18 +36,27 @@ public class InboxTable extends AbstractTableModel {
 		row = inbox.length - 1 - row;
 		try {
 			if(col == 0) {
+				if(inbox.length == 0){
+					return "No messages";
+				}
 				if(inbox[row].isSet(Flag.SEEN))
 					return inbox[row].getSubject();
 				else
 					return first + inbox[row].getSubject() + last;
 			}
 			if(col == 1) {
+				if(inbox.length == 0){
+					return " ";
+				}
 				if(inbox[row].isSet(Flag.SEEN))
 					return inbox[row].getFrom()[0];
 				else
 					return first + inbox[row].getFrom()[0] + last;
 			}
 			if(col == 2) {
+				if(inbox.length == 0){
+					return " ";
+				}
 				if(inbox[row].isSet(Flag.SEEN))
 					return new SimpleDateFormat("MM/dd").format(inbox[row].getReceivedDate());
 				else
@@ -61,6 +70,9 @@ public class InboxTable extends AbstractTableModel {
 	}
 	
 	public Message getRow(int row) {
+		if(inbox.length == 0){
+			return null;
+		}
 		return inbox[inbox.length - 1 - row];
 	}
 
