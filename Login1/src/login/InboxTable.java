@@ -64,4 +64,11 @@ public class InboxTable extends AbstractTableModel {
 		return inbox[inbox.length - 1 - row];
 	}
 
+	public Message[] getMessages() {
+		return inbox;
+	}
+	
+	public void setMessages(Message[] msgs) {
+		inbox = msgs;
+	}
 }

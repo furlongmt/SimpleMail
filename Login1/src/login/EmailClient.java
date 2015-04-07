@@ -34,6 +34,10 @@ public class EmailClient implements Serializable {
 		});
 	}
 	
+	public static void setEmailClient(EmailClient iapp) {
+		app = iapp;
+	}
+	
 	public static EmailClient getInstance() {
 		if(app == null) {
 			app = new EmailClient();

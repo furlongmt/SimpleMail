@@ -5,9 +5,19 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.net.URL;
+import java.util.Collections;
+import java.util.List;
 
 import javax.mail.*;
 import javax.mail.Flags.Flag;
@@ -15,6 +25,7 @@ import javax.mail.internet.MimeMultipart;
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.table.*;
+import javax.swing.text.BadLocationException;
 
 public class EmailMainScreen {
 	
@@ -27,6 +38,7 @@ public class EmailMainScreen {
     private static Font fontBold;
     private static JTable table;
     private static InboxTable model;
+    private static JTextField field;
     
     static {
     	 URL fontUrl;
@@ -40,12 +52,31 @@ public class EmailMainScreen {
  		} catch (Exception e1) {
  			fontBold = Font.getFont("FreeSans");
  		}
-         fontBold = new Font(fontBold.getFontName(),Font.BOLD,13);
+        fontBold = new Font(fontBold.getFontName(),Font.BOLD,13);
          
-         EmailClient app = EmailClient.getInstance();
+        EmailClient app = EmailClient.getInstance();
          
-          model = new InboxTable(app.readEmails("All Mail",username,password));
-          table = new JTable(model);
+        model = new InboxTable(app.readEmails("All Mail",username,password));
+        table = new JTable(model);
+    }
+    
+    private static void contactsButton() {
+    	final JButton contact = new JButton("Contacts");
+    	
+    	contact.setSize(200, 200);
+    	table.add(contact);
+    	
+    	contact.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// TODO Auto-generated method stub	    		
+	    		JFrame contactFrame = ContactTableFrame.getInstance();
+	    		
+	    		contactFrame.setVisible(true);
+			}
+    	   		
+    	});
     }
     
 /*   private static void deleteMessage() {
@@ -103,15 +134,15 @@ public class EmailMainScreen {
 			column = table.getColumnModel().getColumn(i);
 			if(i == 0) {
 				column.setPreferredWidth(350);
-				column.setHeaderValue("Subject");
+				column.setHeaderValue("<html><b>Subject</b></html>");
 			}
 			if(i == 1) {
 				column.setPreferredWidth(250);
-				column.setHeaderValue("Sender");
+				column.setHeaderValue("<html><b>Sender</b></html>");
 			}
 			if(i == 2) {
 				column.setPreferredWidth(50);
-				column.setHeaderValue("Date");
+				column.setHeaderValue("<html><b>Date</b></html>");
 			}
 		}
 		
@@ -155,8 +186,9 @@ public class EmailMainScreen {
 		table.setShowVerticalLines(false);
 
 		//These are the buttons that need to be changed
-		deleteMessage();
-		reply();
+		//deleteMessage();
+		contactsButton();
+		//reply();
 		newMessage();
 		
         Insets insets = pane.getInsets();
@@ -168,6 +200,7 @@ public class EmailMainScreen {
         pane.add(scrollPane);
         pane.add(scroll);
         
+       
     }
     
     private static void setMessage(int row) {
@@ -261,8 +294,8 @@ public class EmailMainScreen {
 			contentPane.setLayout(layout);
 								
 			JLabel to = new JLabel("To: ");
-			final JTextField field = new JTextField(25);
-			to.setFont(fontBold);
+			field = new JTextField(25);
+			to.setFont(fontBold);			
 			
 			JLabel subject = new JLabel("Subject: ");
 			final JTextField subject_field = new JTextField(25);
@@ -350,4 +383,5 @@ public class EmailMainScreen {
 		} catch (MessagingException e1) {
 		}
     } 
+
 }
