@@ -1,3 +1,4 @@
+//Matthew Furlong and Robert Larsen
 package login;
 
 import java.awt.*;
@@ -10,9 +11,7 @@ public class LoginScreen {
 	
     private static JFrame frame = new JFrame("Email Login");
     
-    private LoginScreen(){
-    	
-    }
+    private LoginScreen(){}
 
     public static void show() {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -25,8 +24,9 @@ public class LoginScreen {
 		JLabel l_pass = new JLabel("Password:");
 		final JLabel l_load = new JLabel("Invalid Credentials");
 		final JTextField t_username = new JTextField(20);
-		t_username.setText("cu2150tester@gmail.com");
 		final JTextField t_password = new JPasswordField(20);
+		//TODO remove
+		t_username.setText("cu2150tester@gmail.com");
 		t_password.setText("wordpass1");
         JButton b_cancel = new JButton("Cancel");
         JButton b_login = new JButton("Login");
@@ -106,8 +106,8 @@ public class LoginScreen {
 			public void actionPerformed(ActionEvent e) {
 				l_load.setVisible(true);
 				if(t_username.getText().length() > 0 && t_password.getText().length() > 0 && EmailClient.validCreds(t_username.getText(),t_password.getText())){
-					EmailClient app = new EmailClient();
-					InboxTable table = new InboxTable(app.readEmails("All Mail",t_username.getText(),t_password.getText()));
+					EmailClient app = EmailClient.getInstance();
+					InboxTable table = new InboxTable(app.readEmails("All Mail"));
 					try {
 						EmailMainScreen.setComponentsPane(table);
 					} catch (Exception e1) {
@@ -134,6 +134,8 @@ public class LoginScreen {
         Insets insets2 = frame.getInsets();
         frame.setSize(400 + insets2.left + insets2.right,
                       200 + insets2.top + insets2.bottom);
+    	Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+    	frame.setLocation(dim.width/2-frame.getSize().width/2, dim.height/2-frame.getSize().height/2);
         frame.setVisible(true);
     }
     

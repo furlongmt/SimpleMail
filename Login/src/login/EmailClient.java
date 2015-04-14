@@ -1,7 +1,9 @@
+//Matthew Furlong and Robert Larsen
 package login;
 
 import java.io.Serializable;
 import java.util.*;
+
 import javax.mail.*;
 import javax.mail.internet.*;
 
@@ -11,40 +13,39 @@ public class EmailClient implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1193542647330340001L;
-	private String password = "";
-	private String email = ""; 
+	private static String password = "";
+	private static String email = ""; 
 	private final static String google_host = "smtp.gmail.com";
-	private Message[] messages;
-	private Folder[] fs;
+	private static Message[] messages;
+	private static Folder[] fs;
+	private static Session session;
+	private static Properties props;
+	private static EmailClient app;
 	
-	private Properties setProps() {
-		Properties props = new Properties();
+	private EmailClient() {
+		props = new Properties();
 	    props.put("mail.smtp.host", google_host);
 	    props.put("mail.smtp.auth", "true");
 	    props.put("mail.smtp.starttls.enable", "true");
 	    props.put("mail.smtp.port", "587");
 	    
-	    return props;
-	}
-	
-	private Session createSession(Properties props) {
-		Session session = Session.getInstance(props, new javax.mail.Authenticator() {
+	    session = Session.getInstance(props, new javax.mail.Authenticator() {
     		protected PasswordAuthentication getPasswordAuthentication() {
     				return new PasswordAuthentication(email, password);
     		}
 		});
+	}
+	
+	public static EmailClient getInstance() {
+		if(app == null) {
+			app = new EmailClient();
+		}
 		
-		return session;
+		return app;
 	}
 	
 	public void sendMessage(String subject, String body, String recipient) {
-	    
-	   Properties props = setProps();
-	   
-	   Session session = createSession(props);
-	    
-	    
-	    try {
+		try {
 	        Message msg = new MimeMessage(session);
 	        msg.setFrom(new InternetAddress(email));
 	        msg.setRecipients(Message.RecipientType.TO,
@@ -61,26 +62,22 @@ public class EmailClient implements Serializable {
 	}
 	
 	public static boolean validCreds(String un,String pw){
+		email = un;
+		password = pw;
 		try{
-			EmailClient ec = new EmailClient();
-			Properties props = ec.setProps();
-			Session session = ec.createSession(props);
 			Store store = session.getStore("imaps");
 			store.connect(google_host, un, pw);
 			store.close();
 		} catch(Exception ex) {
 			return false;
 		}
+		
 		return true;
 	}
 	
-	public Message[] readEmails(String boxName,String un,String pw) {
-		email = un;
-		password = pw;
-		Properties props = setProps();
+	public Message[] readEmails(String boxName) {
 		
 		try {
-			Session session = createSession(props);
 			Store store = session.getStore("imaps");
 			store.connect(google_host, email, password);
 			fs = store.getFolder("[Gmail]").list();

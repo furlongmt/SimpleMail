@@ -1,3 +1,4 @@
+//Matthew Furlong and Robert Larsen
 package login;
 
 import java.text.SimpleDateFormat;
@@ -73,7 +74,7 @@ public class InboxTable extends AbstractTableModel {
 		if(inbox.length == 0){
 			return null;
 		}
-		return inbox[inbox.length - 1 - row];
+		return inbox[(inbox.length - 1) - row];
 	}
 
 }
