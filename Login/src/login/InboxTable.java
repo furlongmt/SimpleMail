@@ -9,9 +9,6 @@ import javax.swing.table.AbstractTableModel;
 
 public class InboxTable extends AbstractTableModel {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 5497563449061855719L;
 	public static final int COLUMN_COUNT = 3;
 	private Message[] inbox;

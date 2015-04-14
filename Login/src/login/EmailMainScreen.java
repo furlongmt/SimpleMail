@@ -1,31 +1,13 @@
 //Matthew Furlong and Robert Larsen
 package login;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GraphicsEnvironment;
-import java.awt.Insets;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.io.ByteArrayOutputStream;
-import java.io.EOFException;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.*;
 import java.net.URL;
-import java.util.*;
-
 import javax.mail.*;
 import javax.mail.Flags.Flag;
-import javax.mail.Message.RecipientType;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMultipart;
+import javax.mail.internet.*;
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.table.*;
@@ -49,7 +31,6 @@ public class EmailMainScreen {
     private static Container pane;
     private static JTable table;
     private static JFrame contacts;
-    //private static InboxTable model;
     
     static {
    	 	URL fontUrl;
@@ -64,8 +45,6 @@ public class EmailMainScreen {
 			fontBold = Font.getFont("FreeSans");
 		}
         fontBold = new Font(fontBold.getFontName(),Font.BOLD,13);
-        
-        EmailClient.getInstance();
    }
 
     private EmailMainScreen(){}
@@ -77,8 +56,8 @@ public class EmailMainScreen {
     public static void setComponentsPane(final InboxTable model) throws IOException {
     	pane = frame.getContentPane();
     	menuHeight = 2;
-    	pane.removeAll();
-    	pane.revalidate();
+        pane.removeAll();
+        pane.revalidate();
     	pane.setLayout(null);
         table = new JTable(model);
         l_from = new JLabel("from:");
@@ -90,7 +69,6 @@ public class EmailMainScreen {
         scrollPane = new JScrollPane(textPane);
         scroll = new JScrollPane(table);
         compose = new JButton("Compose");
-
         textPane.setEditable(false);
         from.setEditable(false);
         subject.setEditable(false);
@@ -110,9 +88,7 @@ public class EmailMainScreen {
 				column.setHeaderValue("Date");
 			}
 		}
-		
 		table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-
 			@Override
 			public void valueChanged(ListSelectionEvent e) {
 				setMessage(model, table.getSelectedRow());
@@ -120,9 +96,7 @@ public class EmailMainScreen {
 					if(table.getSelectedRow() >= 0 && model.getRow(table.getSelectedRow()) != null){
 						model.getRow(table.getSelectedRow()).setFlag(Flag.SEEN, true);
 					}
-				} catch (MessagingException e1) {
-					e1.printStackTrace();
-				}
+				} catch (MessagingException e1) {}
 			}
 		});
 		
@@ -136,23 +110,18 @@ public class EmailMainScreen {
 				newb.setBackground(Color.WHITE);
 			}
 			newb.addActionListener( new ActionListener(){
-
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					EmailClient app = EmailClient.getInstance();
+					EmailClient app = EmailClient.getInstance("","");
 					selectedFolder = newb.getText();
 					try {
 						setComponentsPane(new InboxTable(app.readEmails(newb.getText())));
-					} catch (IOException e1) {
-					}
+					} catch (IOException e1) {}
 				}
 			});
-			
 		}
-
 		table.setShowHorizontalLines(false);
 		table.setShowVerticalLines(false);
-		
         Insets insets = pane.getInsets();
         scrollPane.setBounds(insets.left, insets.top + 400, 800, 200);
         scroll.setBounds(insets.left + 150, insets.top, 650, 350);
@@ -162,7 +131,6 @@ public class EmailMainScreen {
         from.setBounds(insets.left + 225, insets.top + 350, 570, 25);
         subject.setBounds(insets.left + 225, insets.top + 375, 570, 25);
 		compose.setBounds(insets.left + 25, insets.top + 10, 100, 40);
-
         URL fontUrl;
         Font font = Font.getFont("FreeSans");
 		try {
@@ -174,16 +142,13 @@ public class EmailMainScreen {
 		} catch (Exception e1) {
 			font = Font.getFont("FreeSans");
 		}
-		
 		compose.addActionListener( new ActionListener(){
-
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				getCompose(model);
 			}
 		});
 		reply.addActionListener( new ActionListener(){
-
 			@Override
 			public void actionPerformed(ActionEvent e) {
 		    	if(table.getSelectedRow() >= 0 && model.getRow(table.getSelectedRow()) != null){
@@ -191,7 +156,6 @@ public class EmailMainScreen {
 		    	}
 			}
 		});
-        
         pane.setBackground(new Color(240,255,255));
         reply.setFont(font);
         from.setBackground(Color.WHITE);
@@ -232,7 +196,6 @@ public class EmailMainScreen {
 		pane.add(nc,BorderLayout.LINE_START);
 		pane.add(ec,BorderLayout.LINE_END);
 		contacts.setVisible(true);
-		
 		nc.addActionListener( new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -240,12 +203,10 @@ public class EmailMainScreen {
 				contacts.setVisible(false);
 			}
 		});
-		
 		ec.addActionListener( new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				ContactsScreen j = new ContactsScreen(model);
-				j.setVisible(true);
+				ContactsScreen.getInstance(model).setVisible(true);
 				contacts.setVisible(false);
 			}
 		});
@@ -304,10 +265,12 @@ public class EmailMainScreen {
 			    }
 			}
 		}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		} catch (Exception e) {}
 		textPane.setText(sb.toString());
+		if(textPane.getText().equals("")){
+			from.setText(sb.toString());
+			subject.setText(sb.toString());
+		}
 		if(textPane.getText().startsWith("Content-Type")){
 			textPane.setText(textPane.getText().substring(textPane.getText().indexOf("\n") + 5));
 		}
@@ -332,7 +295,7 @@ public class EmailMainScreen {
     }
     
     private static void replyScreen(boolean checkReply, String intent, String recip) {
-    	final EmailClient app = EmailClient.getInstance();
+    	final EmailClient app = EmailClient.getInstance("","");
 		try {
 	    	Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 			final JFrame newFrame = new JFrame(intent);
@@ -340,16 +303,12 @@ public class EmailMainScreen {
 	    	newFrame.setLocation(dim.width/2-newFrame.getSize().width/2, dim.height/2-newFrame.getSize().height/2);
 			newFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 			newFrame.getContentPane().setBackground(new Color(240,255,255));
-			//newFrame.s(new Color(240,255,255));
-
 			Container contentPane = newFrame.getContentPane();
 			SpringLayout layout = new SpringLayout();
-			contentPane.setLayout(layout);
-								
+			contentPane.setLayout(layout);		
 			JLabel to = new JLabel("To: ");
 			final JTextField field = new JTextField(25);
 			to.setFont(fontBold);
-			
 			JLabel subject = new JLabel("Subject: ");
 			final JTextField subject_field = new JTextField(25);
 			subject.setFont(fontBold);
@@ -362,7 +321,6 @@ public class EmailMainScreen {
 			else if(recip != ""){
 				field.setText(recip);
 			}
-			
 			final JTextArea area = new JTextArea(intent, 15, 31);
 			JScrollPane pane = new JScrollPane(area);
 			area.setEditable(true);
@@ -371,64 +329,40 @@ public class EmailMainScreen {
 			pane.setSize(200, 200);
 			pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 			pane.setForeground(Color.WHITE);
-			
 			area.addMouseListener(new MouseListener() {
-
 				@Override
 				public void mouseClicked(MouseEvent arg0) {
-					// TODO Auto-generated method stub
 					area.setText("");
 				}
-
 				@Override
-				public void mouseEntered(MouseEvent e) {
-					// TODO Auto-generated method stub
-				}
-
+				public void mouseEntered(MouseEvent e) {}
 				@Override
-				public void mouseExited(MouseEvent e) {
-					// TODO Auto-generated method stub
-				}
-
+				public void mouseExited(MouseEvent e) {}
 				@Override
-				public void mousePressed(MouseEvent e) {
-					// TODO Auto-generated method stub
-				}
-
+				public void mousePressed(MouseEvent e) {}
 				@Override
-				public void mouseReleased(MouseEvent e) {
-					// TODO Auto-generated method stub
-				}
+				public void mouseReleased(MouseEvent e) {}
 			});
-			
 			JButton send = new JButton("Send");
-			
 			send.addActionListener( new ActionListener() {
-				
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					app.sendMessage(subject_field.getText(), area.getText(), field.getText());
 					newFrame.dispose();
 				}
-				
 			});
-			
 			layout.putConstraint(SpringLayout.WEST, to, 20, SpringLayout.WEST, contentPane);
 		    layout.putConstraint(SpringLayout.NORTH, to, 27, SpringLayout.NORTH, contentPane);
 		    layout.putConstraint(SpringLayout.NORTH, field, 25, SpringLayout.NORTH, contentPane);
 		    layout.putConstraint(SpringLayout.WEST, field, 51, SpringLayout.EAST, to);
-		    
 		    layout.putConstraint(SpringLayout.WEST, subject, 20, SpringLayout.WEST, contentPane);
 		    layout.putConstraint(SpringLayout.WEST, subject_field, 15, SpringLayout.EAST, subject);
 		    layout.putConstraint(SpringLayout.NORTH, subject, 20, SpringLayout.SOUTH, to);
 		    layout.putConstraint(SpringLayout.NORTH, subject_field, 18, SpringLayout.SOUTH, field);
-		    
 		    layout.putConstraint(SpringLayout.WEST, pane, 23, SpringLayout.WEST, contentPane);
 			layout.putConstraint(SpringLayout.NORTH, pane, 20, SpringLayout.SOUTH, subject);
-			
 		    layout.putConstraint(SpringLayout.SOUTH, send, 0, SpringLayout.SOUTH, contentPane);
 		    layout.putConstraint(SpringLayout.EAST, send, 0, SpringLayout.EAST, contentPane);
-
 		    contentPane.add(pane);
 		    contentPane.add(subject);
 		    contentPane.add(subject_field);

@@ -1,48 +1,48 @@
 package login;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Insets;
-import java.awt.Toolkit;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
-import java.io.EOFException;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.*;
 import javax.swing.table.*;
 
-@SuppressWarnings("serial")
 public class ContactsScreen extends JFrame {
 	
+	private static final long serialVersionUID = 2701350043254429795L;
 	public List<Person> contacts;
+	private static ContactsScreen myInstance;
 	
-	public ContactsScreen(TableModel model){
+	public static ContactsScreen getInstance(TableModel model){
+		if(myInstance == null){
+			myInstance = new ContactsScreen(model);
+		}
+		return myInstance;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private ContactsScreen(TableModel model){
 		super("Contacts");
-		setSize(500, 500);
+		setSize(500, 505);
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
     	setLocation(dim.width/2-getSize().width/2, dim.height/2-getSize().height/2);
 		try {
 			FileInputStream in = new FileInputStream("person.ser");
 			ObjectInputStream data = new ObjectInputStream(in);
-			contacts = (List) data.readObject();
+			contacts = (ArrayList<Person>) data.readObject();
 			data.close();
 			in.close();
 		} catch(EOFException ef) {
-			System.out.println("EOFException found");
+			System.out.println("End of File found");
 		} catch(IOException f) {
-			f.printStackTrace();
+			contacts = new ArrayList<Person>();
+			contacts.add(new Person("","","","", ""));
 		} catch (ClassNotFoundException el) {
-			el.printStackTrace();
+			System.out.println("Class not found");
+		} catch (Exception eft) {
+			System.out.println("Coult not load data file");
 		}
 		Object[][] data = new Object[contacts.size()][5];
 		for(int i = 0;i < contacts.size();i++){
@@ -59,7 +59,7 @@ public class ContactsScreen extends JFrame {
 		JButton removeb = new JButton("-");
 		JButton composeb = new JButton("Compose");
 		JPanel pane = new JPanel();
-		
+		JLabel l_warn = new JLabel("Please hit ENTER to save changes in a box");
         Insets insets = getInsets();
 		pane.setBounds(insets.left, insets.top, 500, 500);
         pane.setBackground(new Color(240,255,255));
@@ -68,43 +68,58 @@ public class ContactsScreen extends JFrame {
 		addb.setBounds(insets.left + 50, insets.top + 400, 50, 50);
 		removeb.setBounds(insets.left + 100, insets.top + 400, 50, 50);
 		composeb.setBounds(insets.left + 200, insets.top + 425, 100, 50);
+		l_warn.setBounds(insets.left + 50, insets.top + 440, l_warn.getSize().width, l_warn.getSize().height);
 		add(pane);
 		pane.add(scroll);
 		pane.add(addb);
 		pane.add(removeb);
 		pane.add(composeb);
+		pane.add(l_warn);
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-		
 		addb.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent evt) {
 				contacts.add(new Person("First","Last","Email","Address", "Phone"));
 				DefaultTableModel model = (DefaultTableModel) table.getModel();
 				model.addRow(new Object[]{"First","Last","Email","Address", "Phone"});
+				table.setRowSelectionInterval(model.getRowCount() - 1, model.getRowCount() - 1);
 			}
 		});
-		
 		removeb.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent evt) {
-				contacts.remove(table.getSelectedRow());
-				DefaultTableModel model = (DefaultTableModel) table.getModel();
-				model.removeRow(table.getSelectedRow());
+				int row = table.getSelectedRow();
+				if(row >= 0){
+					contacts.remove(row);
+					DefaultTableModel model = (DefaultTableModel) table.getModel();
+					model.removeRow(row);
+				}
 			}
 		});
-		
 		composeb.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent evt) {
 				int row = table.getSelectedRow();
-				EmailMainScreen.sendTo(contacts.get(row).getEmail());
-				hideWindow();
+				if(row >= 0){
+					EmailMainScreen.sendTo(contacts.get(row).getEmail());
+					hideWindow();
+				}
 			}
 		});
-		
-		table.addKeyListener(new KeyListener() {
-
+		table.addFocusListener(new FocusListener(){
 			@Override
-			public void keyPressed(KeyEvent e) {
+			public void focusGained(FocusEvent e) {}
+			@Override
+			public void focusLost(FocusEvent e) {
+				for(int row = 0; row < table.getRowCount();row++){
+					contacts.get(row).setFirst(table.getValueAt(row, 0));
+					contacts.get(row).setLast(table.getValueAt(row, 1));
+					contacts.get(row).setEmail(table.getValueAt(row, 2));
+					contacts.get(row).setAddress(table.getValueAt(row, 3));
+					contacts.get(row).setNumber(table.getValueAt(row, 4));
+				}
 			}
-
+		});
+		table.addKeyListener(new KeyListener() {
+			@Override
+			public void keyPressed(KeyEvent e) {}
 			@Override
 			public void keyReleased(KeyEvent e) {
 				if(e.getKeyCode() == KeyEvent.VK_ENTER) {
@@ -116,69 +131,43 @@ public class ContactsScreen extends JFrame {
 					contacts.get(row).setNumber(table.getValueAt(row, 4));
 				}
 			}
-
 			@Override
-			public void keyTyped(KeyEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-			
+			public void keyTyped(KeyEvent e) {}
 		});
-		
-		this.addWindowListener(new WindowListener () {
-			
+		this.addWindowListener(new WindowListener(){
+			@Override
+			public void windowOpened(WindowEvent e) {}
+			@Override
 			public void windowClosing(WindowEvent e) {
-				// TODO Auto-generated method stub
 				try {
 					FileOutputStream out = new FileOutputStream("person.ser");
 					ObjectOutputStream data = new ObjectOutputStream(out);
-
 					data.writeObject(contacts);
-					
 					data.close();
 					out.close();
-				} catch(IOException f) {
-					f.printStackTrace();
-				}
+				} catch(IOException f) {}
 			}
-			
-			public void windowActivated(WindowEvent e) {
-				// TODO Auto-generated method stub
-			}
-			
-			public void windowOpened(WindowEvent e) {
-				// TODO Auto-generated method stub
-
-			}
-			
 			@Override
-			public void windowClosed(WindowEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-
+			public void windowClosed(WindowEvent e) {}
 			@Override
-			public void windowDeactivated(WindowEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-
-
+			public void windowIconified(WindowEvent e) {}
 			@Override
-			public void windowDeiconified(WindowEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-
-
+			public void windowDeiconified(WindowEvent e) {}
 			@Override
-			public void windowIconified(WindowEvent e) {
-				// TODO Auto-generated method stub
-			}
+			public void windowActivated(WindowEvent e) {}
+			@Override
+			public void windowDeactivated(WindowEvent e) {}
 		});
 	}
 	
 	private void hideWindow(){
+		try {
+			FileOutputStream out = new FileOutputStream("person.ser");
+			ObjectOutputStream data = new ObjectOutputStream(out);
+			data.writeObject(contacts);
+			data.close();
+			out.close();
+		} catch(IOException f) {}
 		setVisible(false);
 	}
 	

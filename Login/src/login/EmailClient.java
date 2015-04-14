@@ -9,38 +9,34 @@ import javax.mail.internet.*;
 
 public class EmailClient implements Serializable {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1193542647330340001L;
 	private static String password = "";
 	private static String email = ""; 
-	private final static String google_host = "smtp.gmail.com";
+	private static String google_host = "smtp.gmail.com";
 	private static Message[] messages;
 	private static Folder[] fs;
 	private static Session session;
 	private static Properties props;
 	private static EmailClient app;
 	
-	private EmailClient() {
+	private EmailClient(String host, String port) {
+		google_host = host;
 		props = new Properties();
-	    props.put("mail.smtp.host", google_host);
-	    props.put("mail.smtp.auth", "true");
-	    props.put("mail.smtp.starttls.enable", "true");
-	    props.put("mail.smtp.port", "587");
-	    
+		props.put("mail.smtp.host", google_host);
+		props.put("mail.smtp.auth", "true");
+		props.put("mail.smtp.starttls.enable", "true");
+		props.put("mail.smtp.port", port);
 	    session = Session.getInstance(props, new javax.mail.Authenticator() {
-    		protected PasswordAuthentication getPasswordAuthentication() {
-    				return new PasswordAuthentication(email, password);
-    		}
+	    	protected PasswordAuthentication getPasswordAuthentication() {
+	    		return new PasswordAuthentication(email, password);
+	    	}
 		});
 	}
 	
-	public static EmailClient getInstance() {
+	public static EmailClient getInstance(String host, String port) {
 		if(app == null) {
-			app = new EmailClient();
+			app = new EmailClient(host, port);
 		}
-		
 		return app;
 	}
 	
@@ -48,13 +44,11 @@ public class EmailClient implements Serializable {
 		try {
 	        Message msg = new MimeMessage(session);
 	        msg.setFrom(new InternetAddress(email));
-	        msg.setRecipients(Message.RecipientType.TO,
-	                          InternetAddress.parse(recipient));
+	        msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipient));
 	        msg.setSubject(subject);
 	        msg.setSentDate(new Date());
 	        msg.setText(body);
 	        Transport.send(msg, email, password);
-	        
 	        System.out.println("done");
 	    } catch (MessagingException e) {
 	        System.out.println("The email failed due to the following exception: " + e);
@@ -71,12 +65,10 @@ public class EmailClient implements Serializable {
 		} catch(Exception ex) {
 			return false;
 		}
-		
 		return true;
 	}
 	
 	public Message[] readEmails(String boxName) {
-		
 		try {
 			Store store = session.getStore("imaps");
 			store.connect(google_host, email, password);
@@ -87,11 +79,9 @@ public class EmailClient implements Serializable {
 				folder.open(Folder.READ_WRITE);
 				messages = folder.getMessages();
 			}
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
+		} catch (MessagingException me) {
+			System.out.println("Server temporarily unavailable. Please try again.");
+		} catch (Exception e) {}
 		return messages;
 	}
 }

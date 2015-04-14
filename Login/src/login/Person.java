@@ -5,15 +5,9 @@ import java.io.Serializable;
 
 
 public class Person implements Serializable{
-	/**
-	 * 
-	 */
+	
 	private static final long serialVersionUID = 7600071621925696095L;
-	private String first_name;
-	private String last_name;
-	private String email;
-	private String address;
-	private String phone_number;
+	private String first_name, last_name, email, address, phone_number;
 	
 	public Person(String ifirst_name, String ilast_name, String iemail, String iaddress, String iphone_number) {
 		first_name = ifirst_name;
