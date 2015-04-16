@@ -1,10 +1,10 @@
-//Matthew Furlong and Robert Larsen
 package login;
 
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.net.URL;
+
 import javax.mail.*;
 import javax.mail.Flags.Flag;
 import javax.mail.internet.*;
@@ -12,6 +12,22 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.table.*;
 
+/**
+ * <p> This class provides the gui for the simple mail application </p>
+ * @author Matthew Furlong
+ * @author Rj Larsen
+ * @see JFrame
+ * @see JTextPane
+ * @see Folder
+ * @see Font
+ * @see String
+ * @see JScrollPane
+ * @see JButton
+ * @see JLabel
+ * @see Container
+ * @see JTextField
+ * @see JTable
+ */
 public class EmailMainScreen {
 	
     private static JFrame frame = new JFrame("SimpleMail");
@@ -32,6 +48,11 @@ public class EmailMainScreen {
     private static JTable table;
     private static JFrame contacts;
     
+    /**
+     * <p> Statically initializes font for this class</p>
+     * @see Font
+     * @see GraphicsEnvironment
+     */
     static {
    	 	URL fontUrl;
         fontBold = Font.getFont("FreeSans");
@@ -46,14 +67,27 @@ public class EmailMainScreen {
 		}
         fontBold = new Font(fontBold.getFontName(),Font.BOLD,13);
    }
-
+    
+    /**
+     * <p> Makes the constructor private so it cannot be initialized anywhere outside the class</p>
+     */
     private EmailMainScreen(){}
     
+    /**
+     * @param folder Array of folders from email client object
+     * <p> Setter function for folder array </p>
+     * @see Folder
+     */
     public static void setFolders(Folder[] folder){
     	folders = folder;
     }
 	
-    public static void setComponentsPane(final InboxTable model) throws IOException {
+    /**
+     * <p> Creates main gui </p>
+     * @param model - final InboxTable
+     * @see InboxTable
+     */
+    public static void setComponentsPane(final InboxTable model) {
     	pane = frame.getContentPane();
     	menuHeight = 2;
         pane.removeAll();
@@ -72,54 +106,6 @@ public class EmailMainScreen {
         textPane.setEditable(false);
         from.setEditable(false);
         subject.setEditable(false);
-        TableColumn column;
-		for(int i = 0; i < InboxTable.COLUMN_COUNT; i++) {
-			column = table.getColumnModel().getColumn(i);
-			if(i == 0) {
-				column.setPreferredWidth(350);
-				column.setHeaderValue("Subject");
-			}
-			if(i == 1) {
-				column.setPreferredWidth(250);
-				column.setHeaderValue("Sender");
-			}
-			if(i == 2) {
-				column.setPreferredWidth(50);
-				column.setHeaderValue("Date");
-			}
-		}
-		table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-			@Override
-			public void valueChanged(ListSelectionEvent e) {
-				setMessage(model, table.getSelectedRow());
-				try {
-					if(table.getSelectedRow() >= 0 && model.getRow(table.getSelectedRow()) != null){
-						model.getRow(table.getSelectedRow()).setFlag(Flag.SEEN, true);
-					}
-				} catch (MessagingException e1) {}
-			}
-		});
-		
-		for(int i = 0; i < folders.length; i++){
-			final JButton newb = new JButton(folders[i].getName());
-	        newb.setBounds(pane.getInsets().left, pane.getInsets().top + (menuHeight++ * 30), 150, 30);
-			pane.add(newb);
-			if(newb.getText().compareToIgnoreCase(selectedFolder) == 0){
-				newb.setBackground(Color.LIGHT_GRAY);
-			} else {
-				newb.setBackground(Color.WHITE);
-			}
-			newb.addActionListener( new ActionListener(){
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					EmailClient app = EmailClient.getInstance("","");
-					selectedFolder = newb.getText();
-					try {
-						setComponentsPane(new InboxTable(app.readEmails(newb.getText())));
-					} catch (IOException e1) {}
-				}
-			});
-		}
 		table.setShowHorizontalLines(false);
 		table.setShowVerticalLines(false);
         Insets insets = pane.getInsets();
@@ -142,6 +128,89 @@ public class EmailMainScreen {
 		} catch (Exception e1) {
 			font = Font.getFont("FreeSans");
 		}
+        pane.setBackground(new Color(240,255,255));
+        reply.setFont(font);
+        from.setBackground(Color.WHITE);
+        subject.setBackground(Color.WHITE);
+        reply.setBackground(new Color(179,212,230));
+		compose.setBackground(new Color(255,50,50));
+		compose.setForeground(Color.WHITE);
+		pane.add(compose);
+        pane.add(scrollPane);
+        pane.add(scroll);
+        pane.add(reply);
+        pane.add(l_from);
+        pane.add(l_sub);
+        pane.add(from);
+        pane.add(subject);
+        l_from.setVisible(false);
+        l_sub.setVisible(false);
+        from.setVisible(false);
+        subject.setVisible(false);
+        reply.setVisible(false);
+        TableColumn column;
+		for(int i = 0; i < InboxTable.COLUMN_COUNT; i++) {
+			column = table.getColumnModel().getColumn(i);
+			if(i == 0) {
+				column.setPreferredWidth(350);
+				column.setHeaderValue("Subject");
+			}
+			if(i == 1) {
+				column.setPreferredWidth(250);
+				column.setHeaderValue("Sender");
+			}
+			if(i == 2) {
+				column.setPreferredWidth(50);
+				column.setHeaderValue("Date");
+			}
+		}
+		table.addMouseListener(new MouseListener() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if(e.getClickCount() == 2) {
+					if(table.getSelectedRow() >= 0 && model.getRow(table.getSelectedRow()) != null){
+			    		replyScreen(true, "Reply");
+			    	}
+				}
+			}
+			@Override
+			public void mouseEntered(MouseEvent e) {}
+			@Override
+			public void mouseExited(MouseEvent e) {}
+			@Override
+			public void mousePressed(MouseEvent e) {}
+			@Override
+			public void mouseReleased(MouseEvent e) {}
+		});
+		table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				setMessage(model, table.getSelectedRow());
+				try {
+					if(table.getSelectedRow() >= 0 && model.getRow(table.getSelectedRow()) != null){
+						model.getRow(table.getSelectedRow()).setFlag(Flag.SEEN, true);
+					}
+				} catch (MessagingException e1) {}
+			}
+		});
+		for(int i = 0; i < folders.length; i++){
+			final JButton newb = new JButton(folders[i].getName());
+	        newb.setBounds(pane.getInsets().left, pane.getInsets().top + (menuHeight++ * 30), 150, 30);
+			pane.add(newb);
+			if(newb.getText().compareToIgnoreCase(selectedFolder) == 0){
+				newb.setBackground(Color.LIGHT_GRAY);
+			} else {
+				newb.setBackground(Color.WHITE);
+			}
+			newb.addActionListener( new ActionListener(){
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					EmailClient app = EmailClient.getInstance("","");
+					selectedFolder = newb.getText();
+					setComponentsPane(new InboxTable(app.readEmails(newb.getText())));
+				}
+			});
+		}
 		compose.addActionListener( new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -156,24 +225,13 @@ public class EmailMainScreen {
 		    	}
 			}
 		});
-        pane.setBackground(new Color(240,255,255));
-        reply.setFont(font);
-        from.setBackground(Color.WHITE);
-        subject.setBackground(Color.WHITE);
-        reply.setBackground(new Color(179,212,230));
-		compose.setBackground(new Color(255,50,50));
-		compose.setForeground(Color.WHITE);
-		pane.add(compose);
-        pane.add(scrollPane);
-        pane.add(scroll);
-        pane.add(reply);
-        pane.add(l_from);
-        pane.add(from);
-        pane.add(l_sub);
-        pane.add(subject);
-        
     }
     
+    /**
+     * <p> This function opens the screen to compose a message upon pressing the compose button</p>
+     * @param model - Final InboxTable
+     * @see InboxTable
+     */
     private static void getCompose(final InboxTable model){
     	if(contacts != null){
     		contacts.setVisible(true);
@@ -212,22 +270,30 @@ public class EmailMainScreen {
 		});
     }
     
+    /**
+     * <p> This function displays the message into the lower text field of the gui after parsing it properly </p>
+     * @param model - InboxTable
+     * @param row - Integer from tables selected row
+     * @see InboxTable
+     */
     private static void setMessage(InboxTable model, int row) {
     	final StringBuilder sb = new StringBuilder();
-		String fromStr = "";
+    	final StringBuilder sb1 = new StringBuilder();
+    	final StringBuilder sb2 = new StringBuilder();
+        boolean invisible = true;
 		Address lastAddr = new InternetAddress();
 		try {
 			if(row >= 0 && model.getRow(row) == null){}
 			else if(row >= 0 &&model.getRow(row).getContent() instanceof String){
 				for(Address a : model.getRow(row).getFrom()){
 					if(a != lastAddr){
-						fromStr += a.toString() + "; ";
+						sb1.append(a.toString() + "; ");
 						lastAddr = a;
 					}
 				}
-				from.setText(fromStr);
-				subject.setText(model.getRow(row).getSubject());
+				sb2.append(model.getRow(row).getSubject());
 				sb.append(model.getRow(row).getContent());
+				invisible = false;
 			}
 			else if(row >= 0){
 			MimeMultipart mmp = (MimeMultipart) model.getRow(row).getContent();
@@ -237,13 +303,13 @@ public class EmailMainScreen {
 			    {
 			    	for(Address a : model.getRow(row).getFrom()){
 						if(a != lastAddr){
-							fromStr += a.toString() + "; ";
+							sb1.append(a.toString() + "; ");
 							lastAddr = a;
 						}
 					}
-					from.setText(fromStr);
-					subject.setText(model.getRow(row).getSubject());
+					sb2.append(model.getRow(row).getSubject());
 				    sb.append(mbp.getContent().toString());
+					invisible = false;
 			    }
 			    else if (mbp.getContent() instanceof Multipart)
 			    {
@@ -255,28 +321,38 @@ public class EmailMainScreen {
 			        }
 			        for(Address a : model.getRow(row).getFrom()){
 						if(a != lastAddr){
-							fromStr += a.toString() + "; ";
+							sb1.append(a.toString() + "; ");
 							lastAddr = a;
 						}
 					}
-					from.setText(fromStr);
-					subject.setText(model.getRow(row).getSubject());
+					sb2.append(model.getRow(row).getSubject());
 			        sb.append(bstr.toString());
+					invisible = false;
 			    }
 			}
 		}
 		} catch (Exception e) {}
 		textPane.setText(sb.toString());
-		if(textPane.getText().equals("")){
-			from.setText(sb.toString());
-			subject.setText(sb.toString());
-		}
+		from.setText(sb1.toString());
+		subject.setText(sb2.toString());
+		if(!invisible){
+        	l_from.setVisible(true);
+            l_sub.setVisible(true);
+            from.setVisible(true);
+            subject.setVisible(true);
+            reply.setVisible(true);
+        }
 		if(textPane.getText().startsWith("Content-Type")){
 			textPane.setText(textPane.getText().substring(textPane.getText().indexOf("\n") + 5));
 		}
 		textPane.setCaretPosition(0);
 	}
 
+    /**
+     *<p> This function displays the email client main screen and hides the login screen </p>
+     * @param un - Username for email
+     * @param pw - Password for email
+     */
     public static void show(String un, String pw) {
     	Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -286,14 +362,29 @@ public class EmailMainScreen {
         frame.setVisible(true);
     }
     
-    public static void sendTo(String a){
-    	replyScreen(false, "Compose", a);
+    /**
+     * <p> This function opens the gui to reply to a message </p>
+     * @param recip - Recipient of message
+     */
+    public static void sendTo(String recip){
+    	replyScreen(false, "Compose", recip);
     }
     
+    /**
+     * <p> This message creates the gui to reply to a message which is then displayed by the sendTo function </p>
+     * @param checkReply - Checks whether it is a reply or not
+     * @param intent - Title of frame and string displayed in textfield
+     */
     private static void replyScreen(boolean checkReply, String intent){
     	replyScreen(checkReply, intent, "");
     }
     
+    /**
+     * <p> This message creates the gui to reply to a message which is then displayed by the sendTo function </p>
+     * @param checkReply - Checks whether it is a reply or not
+     * @param intent - Title of frame and string displayed in textfield
+     * @param recip - To whome the message is being sent
+     */
     private static void replyScreen(boolean checkReply, String intent, String recip) {
     	final EmailClient app = EmailClient.getInstance("","");
 		try {
@@ -370,7 +461,6 @@ public class EmailMainScreen {
 			contentPane.add(to);
 			contentPane.add(field);
 			newFrame.setVisible(true);
-		} catch (MessagingException e1) {
-		}
+		} catch (MessagingException e1) {}
     } 
 }

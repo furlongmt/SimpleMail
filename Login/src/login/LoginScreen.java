@@ -1,4 +1,3 @@
-//Matthew Furlong and Robert Larsen
 package login;
 
 import java.awt.*;
@@ -7,14 +6,43 @@ import java.io.*;
 import java.net.URL;
 
 import javax.swing.*;
-
+/**
+ * <p> This class provides the gui for the login screen </p>
+ * @author Matthew Furlong
+ * @author Rj Larsen
+ * @see JFrame
+ */
 public class LoginScreen {
 	
     private static JFrame frame = new JFrame("Email Login");
     private static boolean hitonce = false;
     
+    /**
+     * <p> Private the constructor so only one instance can be made</p>
+     */
     private LoginScreen(){}
-
+    
+    /**
+     * <p> Shows the login screen</p>
+     * @see Container
+     * @see JLabel
+     * @see JCheckBox
+     * @see JTextField
+     * @see JPasswordField
+     * @see JButton
+     * @see Font
+     * @see GraphicsEnvironment
+     * @see URL
+     * @see Insets
+     * @see Dimension
+     * @see KeyAdapter
+	 * @see FileOutputStream
+	 * @see ObjectOutputStream
+	 * @see FileInputStream
+	 * @see ObjectInputStream
+	 * @see WindowListener
+	 * @see Exception
+     */
     public static void show() {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         Container pane = frame.getContentPane();
@@ -219,8 +247,10 @@ public class LoginScreen {
         t_username.requestFocus();
     }
     
+    /**
+     * <p> Hides the login screen</p>
+     */
     public static void hide(){
     	frame.setVisible(false);
-    }
-    
+    }   
 }

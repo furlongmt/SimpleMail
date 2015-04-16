@@ -1,4 +1,3 @@
-//Matthew Furlong and Robert Larsen
 package login;
 
 import java.io.Serializable;
@@ -7,6 +6,16 @@ import java.util.*;
 import javax.mail.*;
 import javax.mail.internet.*;
 
+/**
+ * <p> This class handles the backend support for the simple mail client </p>
+ * @author Matthew Furlong
+ * @author Rj Larsen
+ * @see Folder
+ * @see Message
+ * @see String
+ * @see Session
+ * @see Properties
+ */
 public class EmailClient implements Serializable {
 
 	private static final long serialVersionUID = 1193542647330340001L;
@@ -18,6 +27,14 @@ public class EmailClient implements Serializable {
 	private static Session session;
 	private static Properties props;
 	private static EmailClient app;
+	
+	/**
+	 * <p> This implementation uses a private constructor to create 
+	 * a singleton pattern. It creates a session and adds the necessary
+	 * attributes to the properties variable of the class </p>
+	 * @param - host the host server
+	 * @param - port the host port
+	 */
 	
 	private EmailClient(String host, String port) {
 		google_host = host;
@@ -33,6 +50,11 @@ public class EmailClient implements Serializable {
 		});
 	}
 	
+	/**
+	 * @param - host used to specify host for constructor
+	 * @param - port used to specify port for constructor
+	 * @return EmailClient app
+	 */
 	public static EmailClient getInstance(String host, String port) {
 		if(app == null) {
 			app = new EmailClient(host, port);
@@ -40,6 +62,13 @@ public class EmailClient implements Serializable {
 		return app;
 	}
 	
+	/**
+	 * <p> This function will send a message using the already 
+	 * preconfigured host and port</p>
+	 * @param subject - subject of the message
+	 * @param body - body text for message
+	 * @param recipient - to whom the message will be sent
+	 */
 	public void sendMessage(String subject, String body, String recipient) {
 		try {
 	        Message msg = new MimeMessage(session);
@@ -55,6 +84,12 @@ public class EmailClient implements Serializable {
 	    }
 	}
 	
+	/**
+	 * <p> Checks to ensure that the email credentials are correct </p>
+	 * @param un - username for email account
+	 * @param pw - password for email account
+	 * @return boolean
+	 */
 	public static boolean validCreds(String un,String pw){
 		email = un;
 		password = pw;
@@ -68,6 +103,13 @@ public class EmailClient implements Serializable {
 		return true;
 	}
 	
+	/**
+	 * <p> This function reads the emails of particular gmail folder
+	 * and returns these emails in an array</p>
+	 * @param boxName - name of email folder to be read
+	 * @return Array of type Message
+	 * @see Message
+	 */
 	public Message[] readEmails(String boxName) {
 		try {
 			Store store = session.getStore("imaps");

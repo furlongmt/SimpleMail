@@ -5,16 +5,28 @@ import java.awt.event.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.swing.*;
 import javax.swing.table.*;
 
+/**
+ * <p> This class provides the gui for the contacts screen </p>
+ * @author Matthew Furlong
+ * @author Rj Larsen
+ * @see JFrame
+ * @see List
+ */
 public class ContactsScreen extends JFrame {
 	
 	private static final long serialVersionUID = 2701350043254429795L;
 	public List<Person> contacts;
 	private static ContactsScreen myInstance;
 	
+	/**
+	 * <p> This function gets the static ContactsScreen instance</p>
+	 * @param model - TableModel for the contacts screen table
+	 * @return ContactsScreen
+	 * @see TableModel
+	 */
 	public static ContactsScreen getInstance(TableModel model){
 		if(myInstance == null){
 			myInstance = new ContactsScreen(model);
@@ -22,6 +34,31 @@ public class ContactsScreen extends JFrame {
 		return myInstance;
 	}
 	
+	/**
+	 * <p> This function creates the window for a ContactsScreen</p>
+	 * @param model - TableModel for the contacts screen table
+	 * @see TableModel
+	 * @see Dimension
+	 * @see ArrayList
+	 * @see Person
+	 * @see FileInputStream
+	 * @see ObjectInputStream
+	 * @see JTable
+	 * @see DefaultTableModel
+	 * @see JScrollPane
+	 * @see JButton
+	 * @see JPanel
+	 * @see JLabel
+	 * @see Insets
+	 * @see MouseAdapter
+	 * @see FocusListener
+	 * @see KeyListener
+	 * @see WindowListener
+	 * @see IOException
+	 * @see EOFException
+	 * @see ClassNotFoundException
+	 * @see Exception
+	 */
 	@SuppressWarnings("unchecked")
 	private ContactsScreen(TableModel model){
 		super("Contacts");
@@ -160,6 +197,12 @@ public class ContactsScreen extends JFrame {
 		});
 	}
 	
+	/**
+	 * <p>This function hides the ContactsScreen</p>
+	 * @see FileOutputStream
+	 * @see ObjectOutputStream
+	 * @see IOException
+	 */
 	private void hideWindow(){
 		try {
 			FileOutputStream out = new FileOutputStream("person.ser");
